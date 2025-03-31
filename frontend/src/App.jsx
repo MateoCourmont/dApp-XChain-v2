@@ -7,6 +7,7 @@ import LandingPage from "./pages/LandingPage";
 import PreDashboard from "./pages/PreDashboard";
 import SenderDashboard from "./pages/SenderDashboard";
 import CarrierDashboard from "./pages/CarrierDashboard";
+import TermsAndCond from "./pages/TermsAndCond";
 import Footer from "./components/Footer";
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
                   path="/CarrierDashboard"
                   element={<CarrierDashboard />}
                 />
+                <Route path="/TermsAndCond" element={<TermsAndCond />} />
               </Routes>
             </div>
             <Footer className="mt-auto" />
