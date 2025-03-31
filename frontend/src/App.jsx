@@ -1,11 +1,12 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { ThemeProvider } from "./ThemeContext";
 import { LangProvider } from "./LangContext";
+import ScrollToTop from "./components/ScrollToTop";
 import Header from "./components/Header";
 import LandingPage from "./pages/LandingPage";
-import PreDasboard from "./pages/PreDasboard";
+import PreDashboard from "./pages/PreDashboard";
 import SenderDashboard from "./pages/SenderDashboard";
-import CarrierDasboard from "./pages/CarrierDashboard";
+import CarrierDashboard from "./pages/CarrierDashboard";
 import Footer from "./components/Footer";
 
 function App() {
@@ -13,14 +14,22 @@ function App() {
     <ThemeProvider>
       <LangProvider>
         <Router>
-          <Header />
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/PreDasboard" element={<PreDasboard />} />
-            <Route path="/SenderDashboard" element={<SenderDashboard />} />
-            <Route path="/CarrierDashboard" element={<CarrierDasboard />} />
-          </Routes>
-          <Footer />
+          <ScrollToTop />
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <div className="flex-grow">
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/PreDashboard" element={<PreDashboard />} />
+                <Route path="/SenderDashboard" element={<SenderDashboard />} />
+                <Route
+                  path="/CarrierDashboard"
+                  element={<CarrierDashboard />}
+                />
+              </Routes>
+            </div>
+            <Footer className="mt-auto" />
+          </div>
         </Router>
       </LangProvider>
     </ThemeProvider>

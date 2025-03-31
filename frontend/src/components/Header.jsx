@@ -1,6 +1,9 @@
 import { useState, useContext } from "react";
 import { ThemeContext } from "../ThemeContext";
 import { useLanguage } from "../LangContext";
+import logo from "../assets/img/X.webp";
+import en_flag from "../assets/img/en.png";
+import fr_flag from "../assets/img/fr.png";
 
 const Header = () => {
   const { isDarkMode, toggleDarkMode } = useContext(ThemeContext);
@@ -14,12 +17,17 @@ const Header = () => {
   return (
     <header className="flex items-center bg-neutral-50 dark:bg-black h-20 z-50 sticky top-0 transition-colors duration-300 font-poppins">
       <nav className="flex flex-1 justify-between px-5 md:px-7 items-center transition-colors duration-300 md:text-lg">
-        <div>
+        <div className="flex items-center">
+          <img
+            src={logo}
+            alt="logo"
+            className="size-5 transition-colors duration-300"
+          />
           <a
             href="/"
             className="font-bold text-black dark:text-white text-xl transition-colors duration-300"
           >
-            XChain
+            Chain
           </a>
         </div>
         <div className="flex items-center gap-7">
@@ -54,9 +62,9 @@ const Header = () => {
               class="size-5 cursor-pointer hover:scale-110 transition-all duration-300"
             >
               {language === "fr" ? (
-                <img src="../src/assets/img/fr.png" alt="en" />
+                <img src={fr_flag} alt="en" />
               ) : (
-                <img src="../src/assets/img/en.png" alt="en" />
+                <img src={en_flag} alt="en" />
               )}
             </button>
           </div>

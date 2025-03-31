@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import X from "../assets/img/X.webp";
 
 const Overlay = () => {
   const [fadeOut, setFadeOut] = useState(false);
@@ -17,7 +18,8 @@ const Overlay = () => {
         fadeOut ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
     >
-      <h1 className="text-4xl md:text-6xl lg:text-8xl font-bold">XChain</h1>
+      <img src={X} alt="Logo" className="size-9 md:size-17 lg:size-27" />
+      <h1 className="text-4xl md:text-6xl lg:text-9xl font-bold">Chain</h1>
     </div>
   );
 };

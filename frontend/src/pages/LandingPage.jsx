@@ -1,5 +1,7 @@
 import { useLanguage } from "../LangContext";
 import Overlay from "../components/Overlay";
+import heroImg from "../assets/img/portrait-hero.jpg";
+import aboutImg from "../assets/img/office.jpg";
 
 const LandingPage = () => {
   const { language } = useLanguage();
@@ -19,8 +21,8 @@ const LandingPage = () => {
               ? "The blockchain-based logistics platform which helps you with the supply chain."
               : "La plateforme de logistique basée sur la blockchain qui vous aide pour la gestion de votre supply chain."}
           </h2>
-          <button className="text-neutral-800 dark:text-neutral-50 bg-gradient-to-r from-yellow-600 to-orange-600 font-semibold py-3 px-8 md:py-4 lg:py-5 text-sm md:text-lg lg:text-xl rounded-full cursor-pointer transition-colors duration-300 hover:opacity-90">
-            <a href="/PreDasboard">
+          <button className="text-neutral-800 dark:text-neutral-50 bg-gradient-to-r from-yellow-600 to-orange-600 font-semibold py-3 px-8 md:py-4 lg:py-5 text-sm md:text-lg lg:text-xl rounded-full cursor-pointer transition-all duration-300 hover:opacity-90 hover:scale-102">
+            <a href="/PreDashboard">
               {language === "en"
                 ? "Let's work together!"
                 : "Travaillons ensemble !"}
@@ -29,7 +31,7 @@ const LandingPage = () => {
         </div>
         <div className="flex flex-1">
           <img
-            src="../src/assets/img/portrait-hero.jpg"
+            src={heroImg}
             alt="Hero image"
             className="rounded-xl scale-95 md:scale-100 md:h-96 object-cover flex flex-1 justify-center"
           />
@@ -40,11 +42,7 @@ const LandingPage = () => {
         className="flex py-8 md:py-12 px-5 md:px-7 lg:px-12 lg:gap-12 bg-neutral-50 dark:bg-black transition-colors duration-300"
       >
         <div className="flex-1 hidden lg:flex">
-          <img
-            src="../src/assets/img/office.png"
-            alt="Office image"
-            className="rounded-xl"
-          />
+          <img src={aboutImg} alt="Office image" className="rounded-xl" />
         </div>
         <div className="flex flex-1 flex-col gap-6 md:gap-8">
           <div>
