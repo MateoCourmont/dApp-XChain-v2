@@ -21,7 +21,7 @@ const LandingPage = () => {
               ? "The blockchain-based logistics platform which helps you with the supply chain."
               : "La plateforme de logistique basée sur la blockchain qui vous aide pour la gestion de votre supply chain."}
           </h2>
-          <button className="text-neutral-800 dark:text-neutral-50 bg-gradient-to-r from-yellow-600 to-orange-600 font-semibold py-3 px-8 md:py-4 lg:py-5 text-sm md:text-lg lg:text-xl rounded-full cursor-pointer transition-all duration-300 hover:opacity-90 hover:scale-102">
+          <button className="text-neutral-800 dark:text-neutral-50 bg-gradient-to-r from-yellow-600 to-orange-600 font-normal py-3 px-8 md:py-4 lg:py-5 text-sm md:text-lg lg:text-xl rounded-full cursor-pointer transition-all duration-300 hover:opacity-90 hover:scale-102">
             <a href="/PreDashboard">
               {language === "en"
                 ? "Let's work together!"
