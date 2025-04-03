@@ -7,6 +7,7 @@ import LandingPage from "./pages/LandingPage";
 import PreDashboard from "./pages/PreDashboard";
 import SenderDashboard from "./pages/SenderDashboard";
 import CarrierDashboard from "./pages/CarrierDashboard";
+import PrivateRoute from "./components/PrivateRoute";
 import TermsAndCond from "./pages/TermsAndCond";
 import Footer from "./components/Footer";
 
@@ -22,10 +23,13 @@ function App() {
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/PreDashboard" element={<PreDashboard />} />
-                <Route path="/SenderDashboard" element={<SenderDashboard />} />
+                <Route
+                  path="/SenderDashboard"
+                  element={<PrivateRoute element={SenderDashboard} />}
+                />
                 <Route
                   path="/CarrierDashboard"
-                  element={<CarrierDashboard />}
+                  element={<PrivateRoute element={CarrierDashboard} />}
                 />
                 <Route path="/TermsAndCond" element={<TermsAndCond />} />
               </Routes>

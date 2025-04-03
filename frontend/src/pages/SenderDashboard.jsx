@@ -7,7 +7,7 @@ function SenderDashboard() {
   return (
     <div className="font-poppins flex flex-col px-5 md:px-7 py-8 items-center justify-start w-full min-h-screen gap-4 md:gap-6 bg-neutral-50 dark:bg-black transition-colors duration-300">
       <div className="flex flex-col items-center justify-center w-full h-auto gap-4 md:gap-6">
-        <h2 className="flex justify-center items-center text-center text-xl md:text-2xl lg:text-3xl font-semibold w-full py-4 rounded-xl text-black dark:text-white bg-gradient-to-r from-yellow-600 to-orange-600 transition-colors duration-300">
+        <h2 className="flex justify-center items-center text-center text-xl md:text-2xl lg:text-3xl font-normal w-full py-4 rounded-xl text-black dark:text-white bg-gradient-to-r from-yellow-600 to-orange-600 transition-colors duration-300">
           {language === "en"
             ? "Sender Dashboard"
             : "Tableau de bord expéditeur"}

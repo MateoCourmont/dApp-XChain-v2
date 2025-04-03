@@ -7,6 +7,7 @@ function PreDashboard() {
   const [selectedRole, setSelectedRole] = useState(null);
   const [walletAddress, setWalletAddress] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
   const roleTranslations = {
     carrier: { en: "carrier", fr: "transporteur" },
     sender: { en: "sender", fr: "expéditeur" },
@@ -38,11 +39,14 @@ function PreDashboard() {
       // const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
       // await contract.registerUser(address, selectedRole);
 
-      // Redirection après enregistrement réussi
+      // Ajoute le fadeOut avant la redirection
+      setFadeOut(true);
+
+      // Redirection après fade-out
       setTimeout(() => {
         window.location.href =
           selectedRole === "carrier" ? "/CarrierDashboard" : "/SenderDashboard";
-      }, 1000);
+      }, 200);
     } catch (error) {
       console.error("Wallet connection failed", error);
       alert("Failed to connect wallet.");
@@ -52,10 +56,14 @@ function PreDashboard() {
   }
 
   return (
-    <div className="font-poppins flex flex-col px-5 md:px-7 py-8 items-center justify-start w-full h-screen bg-neutral-50 dark:bg-black transition-colors duration-300">
+    <div
+      className={`font-poppins flex flex-col px-5 md:px-7 py-8 items-center justify-start w-full h-screen bg-neutral-50 dark:bg-black transition-colors duration-300 ${
+        fadeOut ? "opacity-0 transition-opacity duration-500" : ""
+      }`}
+    >
       <div>
-        <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-neutral-800 dark:text-neutral-50 transition-colors duration-300">
-          {language === "en" ? "I am:" : "Je suis :"}
+        <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold text-neutral-800 dark:text-neutral-50 transition-colors duration-300">
+          {language === "en" ? "You are:" : "Vous êtes :"}
         </h2>
       </div>
       <div className="flex flex-col w-8/10 md:flex-row gap-7 md:gap-9 lg:gap-12 py-8 md:py-12">
@@ -73,26 +81,13 @@ function PreDashboard() {
         </button>
       </div>
       {selectedRole && !walletAddress && (
-        <div className="flex flex-col text-center w-8/10 gap-3 md:gap-4 lg:gap-5 py-4 md:py-6 transition-colors duration-300">
-          <p className="text-md md:text-xl lg:text-2xl text-neutral-800 dark:text-neutral-50">
-            {language === "en" ? (
-              <>
-                You are the{" "}
-                <span className="font-semibold">
-                  {roleTranslations[selectedRole]?.en}
-                </span>
-              </>
-            ) : (
-              <>
-                Vous êtes {selectedRole === "sender" ? "l'" : "le "}
-                <span className="font-semibold">
-                  {roleTranslations[selectedRole]?.fr}
-                </span>
-              </>
-            )}
-          </p>
+        <div
+          className={`flex flex-col text-center w-8/10 gap-3 md:gap-4 lg:gap-5 py-4 md:py-6 transition-colors duration-300 ${
+            fadeOut ? "opacity-0 transition-opacity duration-500" : ""
+          }`}
+        >
           <button
-            className="bg-gradient-to-r from-yellow-600 to-orange-600 text-xl md:text-2xl lg:text-3xl w-full py-2 rounded-full dark:text-white cursor-pointer hover:opacity-90 hover:scale-102 transition-all duration-300"
+            className="bg-gradient-to-r from-yellow-600 to-orange-600 text-lg md:text-2xl lg:text-3xl w-full py-2 rounded-full dark:text-white cursor-pointer hover:opacity-90 hover:scale-102 transition-all duration-300"
             onClick={connectWallet}
             disabled={loading}
           >
@@ -101,8 +96,12 @@ function PreDashboard() {
                 ? "Connecting..."
                 : "Connexion..."
               : language === "en"
-              ? "Connect to MetaMask"
-              : "Connexion à MetaMask"}
+              ? `Connect as a ${roleTranslations[selectedRole]?.en}`
+              : `Connexion en tant ${
+                  roleTranslations[selectedRole]?.fr?.match(/^[aeiouh]/)
+                    ? "qu'"
+                    : "que "
+                }${roleTranslations[selectedRole]?.fr}`}
           </button>
         </div>
       )}
