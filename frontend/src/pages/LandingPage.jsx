@@ -47,7 +47,7 @@ const LandingPage = () => {
         <div className="flex flex-1 flex-col gap-6 md:gap-8">
           <div>
             <h2 className="text-neutral-800 dark:text-neutral-50 font-extrabold text-2xl md:text-3xl lg:text-4xl uppercase">
-              {language === "en" ? "About XChain?" : "Qui sommes-nous ?"}
+              {language === "en" ? "About XChain" : "Qui sommes-nous ?"}
             </h2>
           </div>
           <div className="flex flex-col gap-3 md:gap-5">

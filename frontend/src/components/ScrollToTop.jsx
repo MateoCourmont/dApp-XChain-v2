@@ -23,7 +23,7 @@ const ScrollToTop = () => {
   return (
     <button
       onClick={scrollToTop}
-      className={`font-poppins fixed bottom-6 right-6 bg-neutral-200 dark:bg-neutral-800 text-black dark:text-white p-3 rounded-xl shadow-lg transition-opacity duration-300 cursor-pointer ${
+      className={`font-poppins fixed bottom-4 right-6 bg-gradient-to-r from-yellow-600 to-orange-600 text-black dark:text-white p-3 rounded-xl shadow-lg transition-opacity duration-300 cursor-pointer ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
     >

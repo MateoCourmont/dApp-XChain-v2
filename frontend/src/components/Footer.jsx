@@ -3,7 +3,7 @@ import { useLanguage } from "../LangContext";
 const Footer = () => {
   const { language } = useLanguage();
   return (
-    <footer className="flex flex-col md:flex-row gap-2 items-center justify-center bg-neutral-50 dark:bg-black h-20 text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-50 transition-colors duration-300">
+    <footer className="flex flex-col md:flex-row gap-2 items-center justify-center bg-neutral-200 dark:bg-neutral-900 h-20 text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-50 transition-colors duration-300">
       <p>
         {language === "en"
           ? "© 2025 XChain. All rights reserved"
