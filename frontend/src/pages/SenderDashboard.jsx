@@ -1,8 +1,34 @@
+import { useState } from "react";
 import { useLanguage } from "../LangContext";
 import Card from "../components/Card";
+import Modal from "../components/Modal";
 
 function SenderDashboard() {
   const { language } = useLanguage();
+  const [open, setOpen] = useState(false);
+
+  const CreateShipmentFields = [
+    {
+      en: "Shipment name...",
+      fr: "Nom de l'expédition...",
+    },
+    {
+      en: "Receiver address...",
+      fr: "Adresse du destinataire...",
+    },
+    {
+      en: "Shipment price...",
+      fr: "Prix de l'expédition...",
+    },
+    {
+      en: "Pickup location...",
+      fr: "Lieu de ramassage...",
+    },
+    {
+      en: "Delivery location...",
+      fr: "Lieu de livraison...",
+    },
+  ];
 
   return (
     <div className="font-poppins flex flex-col px-5 md:px-7 py-8 items-center justify-start w-full min-h-screen gap-4 md:gap-6 bg-neutral-50 dark:bg-black transition-colors duration-300">
@@ -13,9 +39,26 @@ function SenderDashboard() {
             : "Tableau de bord expéditeur"}
         </h2>
         <div className="flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-6 w-full h-full">
-          <Card>
-            {language === "en" ? "Create a shipment" : "Créer une expédition"}
-          </Card>
+          <button id="createShipment" onClick={() => setOpen(true)}>
+            <Card>
+              {language === "en" ? "Create a shipment" : "Créer une expédition"}
+            </Card>
+          </button>
+
+          <Modal open={open} onClose={() => setOpen(false)}>
+            <h2 className="text-black dark:text-white text-lg md:text-xl font-normal">
+              {language === "en" ? "Create a shipment" : "Créer une expédition"}
+            </h2>
+            {CreateShipmentFields.map((field, index) => (
+              <input
+                key={index}
+                className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
+                type="text"
+                placeholder={field[language]}
+              />
+            ))}
+          </Modal>
+
           <Card>
             {language === "en"
               ? "Get shipment information"
