@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useLanguage } from "../LangContext";
 import { Navigate } from "react-router-dom";
 import { ethers } from "ethers";
 
 // Protéger l'accès aux dashboards
 const PrivateRoute = ({ element: Element, ...rest }) => {
+  const { language } = useLanguage();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true); // Ajouter un état pour le chargement
 
@@ -35,9 +37,9 @@ const PrivateRoute = ({ element: Element, ...rest }) => {
     checkConnection();
   }, []);
 
-  // Si l'on est en train de charger, afficher un loading
+  // Si l'on est en train de charger
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="bg-neutral-50 dark:bg-black"></div>;
   }
 
   // Si l'utilisateur est authentifié, rendre la route demandée, sinon rediriger vers PreDashboard

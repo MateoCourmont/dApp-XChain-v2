@@ -10,7 +10,7 @@ const Modal = ({ open, onClose, children }) => {
       {/* modal */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`bg-white dark:bg-neutral-900 rounded-xl p-4 transition-all flex flex-col items-center gap-4 w-2/3 md:w-1/2 ${
+        className={`bg-white dark:bg-neutral-900 rounded-xl p-4 md:p-6 transition-all flex flex-col items-center gap-2 md:gap-4 w-2/3 md:w-1/2 ${
           open ? "scale-100 opacity-100" : "scale-125 opacity-0"
         }`}
       >
