@@ -2,52 +2,51 @@ import React, { useState, useEffect } from "react";
 import { useLanguage } from "../LangContext";
 import { Navigate } from "react-router-dom";
 import { ethers } from "ethers";
+import { UserRoleABI } from "../contracts/UserRole";
 
-// Protéger l'accès aux dashboards
-const PrivateRoute = ({ element: Element, ...rest }) => {
+// Protéger l'accès aux dashboards avec vérification du rôle
+const PrivateRoute = ({ element: Element, requiredRole, ...rest }) => {
   const { language } = useLanguage();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true); // Ajouter un état pour le chargement
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const contractAddress = "0x19CF2c5cCa8BF8a43C47E16a01725dDDA679D305";
 
   useEffect(() => {
-    const checkConnection = async () => {
-      if (window.ethereum) {
-        try {
-          // Vérifier la connexion et l'adresse de l'utilisateur
-          const provider = new ethers.BrowserProvider(window.ethereum);
-          const signer = await provider.getSigner();
-          const address = await signer.getAddress();
+    const checkAccess = async () => {
+      try {
+        if (!window.ethereum) throw new Error("MetaMask not found");
 
-          // Si l'utilisateur est connecté, on met à jour isAuthenticated
-          if (address) {
-            setIsAuthenticated(true);
-          } else {
-            setIsAuthenticated(false);
-          }
-        } catch (error) {
-          console.error("Error connecting to MetaMask", error);
-          setIsAuthenticated(false);
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const address = await signer.getAddress();
+
+        const contract = new ethers.Contract(
+          contractAddress,
+          UserRoleABI,
+          signer
+        );
+        const role = await contract.myRole(); // "Sender", "Carrier", or "None"
+
+        if (role === requiredRole) {
+          setIsAuthorized(true);
+        } else {
+          setIsAuthorized(false);
         }
-      } else {
-        setIsAuthenticated(false);
+      } catch (err) {
+        console.error("Authorization failed:", err);
+        setIsAuthorized(false);
       }
       setLoading(false);
     };
 
-    checkConnection();
-  }, []);
+    checkAccess();
+  }, [requiredRole]);
 
-  // Si l'on est en train de charger
   if (loading) {
-    return <div className="bg-neutral-50 dark:bg-black"></div>;
+    return <div className="bg-neutral-50 dark:bg-black">Chargement...</div>;
   }
 
-  // Si l'utilisateur est authentifié, rendre la route demandée, sinon rediriger vers PreDashboard
-  return isAuthenticated ? (
-    <Element {...rest} />
-  ) : (
-    <Navigate to="/PreDashboard" />
-  );
+  return isAuthorized ? <Element {...rest} /> : <Navigate to="/PreDashboard" />;
 };
 
 export default PrivateRoute;

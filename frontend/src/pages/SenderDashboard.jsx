@@ -6,6 +6,32 @@ import Modal from "../components/Modal";
 function SenderDashboard() {
   const { language } = useLanguage();
   const [openModal, setOpenModal] = useState(null);
+  const [shipmentName, setShipmentName] = useState("");
+  const [receiverAddress, setReceiverAddress] = useState("");
+  const [shipmentPrice, setShipmentPrice] = useState("");
+  const [pickupLocation, setPickupLocation] = useState("");
+  const [deliveryLocation, setDeliveryLocation] = useState("");
+  const [shipmentID, setShipmentID] = useState("");
+
+  const handleCompleteSubmit = () => {
+    switch (openModal) {
+      case "create":
+        setShipmentName("");
+        setReceiverAddress("");
+        setShipmentPrice("");
+        setPickupLocation("");
+        setDeliveryLocation("");
+        break;
+      case "info":
+      case "payment":
+      case "live_tracking":
+        setShipmentID("");
+        break;
+      default:
+        break;
+    }
+    setOpenModal(null);
+  };
 
   const CreateShipmentFields = [
     {
@@ -43,14 +69,63 @@ function SenderDashboard() {
         <h2 className="text-black dark:text-white text-lg md:text-xl font-normal mb-2">
           {language === "en" ? "Create a shipment" : "Créer une expédition"}
         </h2>
-        {CreateShipmentFields.map((field, index) => (
-          <input
-            key={index}
-            className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
-            type="text"
-            placeholder={field[language]}
-          />
-        ))}
+        <input
+          type="text"
+          className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
+          value={shipmentName}
+          onChange={(e) => setShipmentName(e.target.value)}
+          placeholder={
+            CreateShipmentFields[0] ? CreateShipmentFields[0][language] : ""
+          }
+        />
+        <input
+          type="text"
+          className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
+          value={receiverAddress}
+          onChange={(e) => setReceiverAddress(e.target.value)}
+          placeholder={
+            CreateShipmentFields[1] ? CreateShipmentFields[1][language] : ""
+          }
+        />
+        <input
+          type="text"
+          className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
+          value={shipmentPrice}
+          onChange={(e) => setShipmentPrice(e.target.value)}
+          placeholder={
+            CreateShipmentFields[2] ? CreateShipmentFields[2][language] : ""
+          }
+        />
+        <input
+          type="text"
+          className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
+          value={pickupLocation}
+          onChange={(e) => setPickupLocation(e.target.value)}
+          placeholder={
+            CreateShipmentFields[3] ? CreateShipmentFields[3][language] : ""
+          }
+        />
+        <input
+          type="text"
+          className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
+          value={deliveryLocation}
+          onChange={(e) => setDeliveryLocation(e.target.value)}
+          placeholder={
+            CreateShipmentFields[4] ? CreateShipmentFields[4][language] : ""
+          }
+        />
+        {shipmentName &&
+          receiverAddress &&
+          shipmentPrice &&
+          pickupLocation &&
+          deliveryLocation && (
+            <button
+              onClick={handleCompleteSubmit}
+              className="bg-gradient-to-r from-yellow-600 to-orange-600 text-black dark:text-white text-sm md:text-base font-normal rounded-xl p-2 mb-2 hover:scale-101 hover:opacity-90 cursor-pointer transition-all duration-300 w-full"
+            >
+              {language === "en" ? "Submit" : "Valider"}
+            </button>
+          )}
       </>
     ),
     info: (
@@ -60,14 +135,23 @@ function SenderDashboard() {
             ? "Get shipment information"
             : "Obtenir les informations"}
         </h2>
-        {IDFields.map((field, index) => (
-          <input
-            key={index}
-            className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
-            type="text"
-            placeholder={field[language]}
-          />
-        ))}
+
+        <input
+          type="text"
+          className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
+          value={shipmentID}
+          onChange={(e) => setShipmentID(e.target.value)}
+          placeholder={IDFields[0] ? IDFields[0][language] : ""}
+        />
+
+        {shipmentID && (
+          <button
+            onClick={handleCompleteSubmit}
+            className="bg-gradient-to-r from-yellow-600 to-orange-600 text-black dark:text-white text-sm md:text-base font-normal rounded-xl p-2 mb-2 hover:scale-101 hover:opacity-90 cursor-pointer transition-all duration-300 w-full"
+          >
+            {language === "en" ? "Submit" : "Valider"}
+          </button>
+        )}
       </>
     ),
     payment: (
@@ -75,14 +159,23 @@ function SenderDashboard() {
         <h2 className="text-black dark:text-white text-lg md:text-xl font-normal mb-2">
           {language === "en" ? "Release the payment" : "Libérer le paiement"}
         </h2>
-        {IDFields.map((field, index) => (
-          <input
-            key={index}
-            className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
-            type="text"
-            placeholder={field[language]}
-          />
-        ))}
+
+        <input
+          type="text"
+          className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
+          value={shipmentID}
+          onChange={(e) => setShipmentID(e.target.value)}
+          placeholder={IDFields[0] ? IDFields[0][language] : ""}
+        />
+
+        {shipmentID && (
+          <button
+            onClick={handleCompleteSubmit}
+            className="bg-gradient-to-r from-yellow-600 to-orange-600 text-black dark:text-white text-sm md:text-base font-normal rounded-xl p-2 mb-2 hover:scale-101 hover:opacity-90 cursor-pointer transition-all duration-300 w-full"
+          >
+            {language === "en" ? "Submit" : "Valider"}
+          </button>
+        )}
       </>
     ),
     history: (
@@ -104,14 +197,23 @@ function SenderDashboard() {
         <h2 className="text-black dark:text-white text-lg md:text-xl font-normal mb-2">
           {language === "en" ? "Real-time tracking" : "Suivi en temps réel"}
         </h2>
-        {IDFields.map((field, index) => (
-          <input
-            key={index}
-            className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
-            type="text"
-            placeholder={field[language]}
-          />
-        ))}
+
+        <input
+          type="text"
+          className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
+          value={shipmentID}
+          onChange={(e) => setShipmentID(e.target.value)}
+          placeholder={IDFields[0] ? IDFields[0][language] : ""}
+        />
+
+        {shipmentID && (
+          <button
+            onClick={handleCompleteSubmit}
+            className="bg-gradient-to-r from-yellow-600 to-orange-600 text-black dark:text-white text-sm md:text-base font-normal rounded-xl p-2 mb-2 hover:scale-101 hover:opacity-90 cursor-pointer transition-all duration-300 w-full"
+          >
+            {language === "en" ? "Submit" : "Valider"}
+          </button>
+        )}
       </>
     ),
     notifications: (
@@ -188,14 +290,14 @@ function SenderDashboard() {
             <Card>
               {language === "en"
                 ? "Get shipment information"
-                : "Obtenir les informations sur une expédition"}
+                : "Obtenir les informations d'une expédition"}
             </Card>
           </button>
           <button id="releasePayment" onClick={() => setOpenModal("payment")}>
             <Card>
               {language === "en"
                 ? "Release the payment for a shipment"
-                : "Libérer le paiement pour une expédition"}
+                : "Libérer le paiement d'une expédition"}
             </Card>
           </button>
           <button id="history" onClick={() => setOpenModal("history")}>

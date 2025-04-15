@@ -6,15 +6,20 @@ import Modal from "../components/Modal";
 function CarrierDashboard() {
   const { language } = useLanguage();
   const [openModal, setOpenModal] = useState(null);
+  const [pickupTime, setPickupTime] = useState("");
+  const [deliveryTime, setDeliveryTime] = useState("");
+  const [shipmentID, setShipmentID] = useState("");
+
+  const handleCompleteSubmit = () => {};
 
   const CompleteShipmentFields = [
     {
-      en: "Pickup time...",
-      fr: "Heure de ramassage...",
+      en: "Pickup time... (hour-minutes)",
+      fr: "Heure de ramassage... (heure-minutes)",
     },
     {
-      en: "Delivery time...",
-      fr: "Heure de livraison...",
+      en: "Delivery time... (hour-minutes)",
+      fr: "Heure de livraison... (heure-minutes)",
     },
     // A compléter avec les éléments du smartcontract
   ];
@@ -34,8 +39,8 @@ function CarrierDashboard() {
         </h2>
         <p className="text-black dark:text-white text-sm md:text-base font-normal mb-2">
           {language === "en"
-            ? "see accepted shipments (development running)"
-            : "voir les expéditions acceptées (developpement en cours)"}
+            ? "see created shipments (development running)"
+            : "voir les expéditions créees (developpement en cours)"}
         </p>
       </>
     ),
@@ -46,14 +51,34 @@ function CarrierDashboard() {
             ? "Complete shipment information"
             : "Compléter les informations"}
         </h2>
-        {CompleteShipmentFields.map((field, index) => (
-          <input
-            key={index}
-            className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
-            type="text"
-            placeholder={field[language]}
-          />
-        ))}
+
+        <input
+          type="text"
+          className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
+          value={pickupTime}
+          onChange={(e) => setPickupTime(e.target.value)}
+          placeholder={
+            CompleteShipmentFields[0] ? CompleteShipmentFields[0][language] : ""
+          }
+        />
+        <input
+          type="text"
+          className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
+          value={deliveryTime}
+          onChange={(e) => setDeliveryTime(e.target.value)}
+          placeholder={
+            CompleteShipmentFields[1] ? CompleteShipmentFields[1][language] : ""
+          }
+        />
+
+        {pickupTime && deliveryTime && (
+          <button
+            onClick={handleCompleteSubmit}
+            className="bg-gradient-to-r from-yellow-600 to-orange-600 text-black dark:text-white text-sm md:text-base font-normal rounded-xl p-2 mb-2 hover:scale-101 hover:opacity-90 cursor-pointer transition-all duration-300 w-full"
+          >
+            {language === "en" ? "Submit" : "Valider"}
+          </button>
+        )}
       </>
     ),
     info: (
@@ -63,14 +88,23 @@ function CarrierDashboard() {
             ? "Get shipment information"
             : "Obtenir les informations"}
         </h2>
-        {IDFields.map((field, index) => (
-          <input
-            key={index}
-            className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
-            type="text"
-            placeholder={field[language]}
-          />
-        ))}
+
+        <input
+          type="text"
+          className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
+          value={shipmentID}
+          onChange={(e) => setShipmentID(e.target.value)}
+          placeholder={IDFields[0] ? IDFields[0][language] : ""}
+        />
+
+        {shipmentID && (
+          <button
+            onClick={handleCompleteSubmit}
+            className="bg-gradient-to-r from-yellow-600 to-orange-600 text-black dark:text-white text-sm md:text-base font-normal rounded-xl p-2 mb-2 hover:scale-101 hover:opacity-90 cursor-pointer transition-all duration-300 w-full"
+          >
+            {language === "en" ? "Submit" : "Valider"}
+          </button>
+        )}
       </>
     ),
     history: (
@@ -92,14 +126,22 @@ function CarrierDashboard() {
         <h2 className="text-black dark:text-white text-lg md:text-xl font-normal mb-2">
           {language === "en" ? "Real-time tracking" : "Suivi en temps réel"}
         </h2>
-        {IDFields.map((field, index) => (
-          <input
-            key={index}
-            className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
-            type="text"
-            placeholder={field[language]}
-          />
-        ))}
+        <input
+          type="text"
+          className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
+          value={shipmentID}
+          onChange={(e) => setShipmentID(e.target.value)}
+          placeholder={IDFields[0] ? IDFields[0][language] : ""}
+        />
+
+        {shipmentID && (
+          <button
+            onClick={handleCompleteSubmit}
+            className="bg-gradient-to-r from-yellow-600 to-orange-600 text-black dark:text-white text-sm md:text-base font-normal rounded-xl p-2 mb-2 hover:scale-101 hover:opacity-90 cursor-pointer transition-all duration-300 w-full"
+          >
+            {language === "en" ? "Submit" : "Valider"}
+          </button>
+        )}
       </>
     ),
     notifications: (
@@ -183,14 +225,14 @@ function CarrierDashboard() {
             <Card>
               {language === "en"
                 ? "Complete shipment information"
-                : "Compléter les informations sur une expédition"}
+                : "Compléter les informations d'une expédition"}
             </Card>
           </button>
           <button id="getInfo" onClick={() => setOpenModal("info")}>
             <Card>
               {language === "en"
                 ? "Get shipment informations"
-                : "Obtenir les informations sur une expédition"}
+                : "Obtenir les informations d'une expédition"}
             </Card>
           </button>
           <button id="history" onClick={() => setOpenModal("history")}>
