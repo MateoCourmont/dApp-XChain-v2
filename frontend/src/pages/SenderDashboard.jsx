@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { useLanguage } from "../LangContext";
+import { ethers } from "ethers";
 import Card from "../components/Card";
 import Modal from "../components/Modal";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { ShippingContractABI } from "../contracts/ShippingContract";
 
 function SenderDashboard() {
   const { language } = useLanguage();
+  const [isLoading, setIsLoading] = useState(false);
   const [openModal, setOpenModal] = useState(null);
+  const [shipmentDetails, setShipmentDetails] = useState(null);
   const [shipmentName, setShipmentName] = useState("");
   const [receiverAddress, setReceiverAddress] = useState("");
   const [shipmentPrice, setShipmentPrice] = useState("");
@@ -13,24 +19,166 @@ function SenderDashboard() {
   const [deliveryLocation, setDeliveryLocation] = useState("");
   const [shipmentID, setShipmentID] = useState("");
 
-  const handleCompleteSubmit = () => {
-    switch (openModal) {
-      case "create":
-        setShipmentName("");
-        setReceiverAddress("");
-        setShipmentPrice("");
-        setPickupLocation("");
-        setDeliveryLocation("");
-        break;
-      case "info":
-      case "payment":
-      case "live_tracking":
-        setShipmentID("");
-        break;
-      default:
-        break;
+  const handleCompleteSubmit = async () => {
+    if (openModal === "info") {
+      await getShipmentDetails();
+      if (shipmentDetails) {
+        setOpenModal("see_details");
+      }
+    } else {
+      switch (openModal) {
+        case "create":
+          await createShipment();
+          break;
+        case "payment":
+        case "live_tracking":
+          setShipmentID("");
+          break;
+        default:
+          break;
+      }
+      setOpenModal(null);
     }
-    setOpenModal(null);
+  };
+
+  const createShipment = async () => {
+    if (
+      !shipmentName ||
+      !receiverAddress ||
+      !shipmentPrice ||
+      !pickupLocation ||
+      !deliveryLocation
+    ) {
+      toast.error(
+        language === "en"
+          ? "Please fill in all fields correctly."
+          : "Veuillez remplir tous les champs correctement."
+      );
+      return;
+    }
+
+    if (!ethers.isAddress(receiverAddress)) {
+      toast.error(
+        language === "en"
+          ? "Invalid receiver address."
+          : "Adresse du destinataire invalide."
+      );
+      return;
+    }
+
+    const price = parseFloat(shipmentPrice);
+    if (isNaN(price) || price <= 0) {
+      toast.error(
+        language === "en"
+          ? "Shipment price must be a positive number."
+          : "Le prix de l'expédition doit être un nombre positif."
+      );
+      return;
+    }
+
+    setIsLoading(true);
+    toast.info(
+      language === "en"
+        ? "Please confirm the transaction in MetaMask..."
+        : "Veuillez confirmer la transaction dans MetaMask..."
+    );
+
+    try {
+      if (typeof window.ethereum === "undefined") {
+        alert("Please install MetaMask");
+        return;
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const ShippingContractAddress =
+        "0xb54e6492ad031681602822b5e0000f163f3a1923";
+
+      const shippingContract = new ethers.Contract(
+        ShippingContractAddress,
+        ShippingContractABI,
+        signer
+      );
+
+      // Convertir le prix en wei
+      const priceInEther = ethers.parseEther(price.toFixed(18));
+
+      const tx = await shippingContract.createShipment(
+        shipmentName,
+        receiverAddress,
+        priceInEther,
+        pickupLocation,
+        deliveryLocation,
+        { gasLimit: 2000000 }
+      );
+
+      await tx.wait();
+
+      setShipmentName("");
+      setReceiverAddress("");
+      setShipmentPrice("");
+      setPickupLocation("");
+      setDeliveryLocation("");
+
+      toast.success(
+        language === "en"
+          ? "Shipment created successfully!"
+          : "Expédition créée avec succès !"
+      );
+    } catch (error) {
+      console.error("Error creating shipment:", error);
+      toast.error(
+        language === "en"
+          ? "Error creating the shipment."
+          : "Erreur lors de la création de l'expédition."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getShipmentDetails = async () => {
+    if (!shipmentID) {
+      toast.error(
+        language === "en"
+          ? "Please enter a valid shipment ID."
+          : "Veuillez entrer un ID d'expédition valide."
+      );
+      return;
+    }
+
+    try {
+      if (typeof window.ethereum === "undefined") {
+        alert("Please install MetaMask");
+        return;
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const ShippingContractAddress =
+        "0xb54e6492ad031681602822b5e0000f163f3a1923";
+      const shippingContract = new ethers.Contract(
+        ShippingContractAddress,
+        ShippingContractABI,
+        signer
+      );
+
+      const shipment = await shippingContract.getShipment(shipmentID);
+
+      setShipmentDetails(shipment);
+
+      console.log("Détails de l'expédition :", shipment);
+    } catch (error) {
+      console.error(
+        "Erreur lors de la récupération des détails de l'expédition :",
+        error
+      );
+      toast.error(
+        language === "en"
+          ? "Error retrieving shipment details."
+          : "Erreur lors de la récupération des détails de l'expédition."
+      );
+    }
   };
 
   const CreateShipmentFields = [
@@ -114,18 +262,21 @@ function SenderDashboard() {
             CreateShipmentFields[4] ? CreateShipmentFields[4][language] : ""
           }
         />
-        {shipmentName &&
-          receiverAddress &&
-          shipmentPrice &&
-          pickupLocation &&
-          deliveryLocation && (
-            <button
-              onClick={handleCompleteSubmit}
-              className="bg-gradient-to-r from-yellow-600 to-orange-600 text-black dark:text-white text-sm md:text-base font-normal rounded-xl p-2 mb-2 hover:scale-101 hover:opacity-90 cursor-pointer transition-all duration-300 w-full"
-            >
-              {language === "en" ? "Submit" : "Valider"}
-            </button>
-          )}
+        <button
+          onClick={handleCompleteSubmit}
+          disabled={isLoading}
+          className={`bg-gradient-to-r from-yellow-600 to-orange-600 text-black dark:text-white text-sm md:text-base font-normal rounded-xl p-2 mb-2 hover:scale-101 hover:opacity-90 cursor-pointer transition-all duration-300 w-full ${
+            isLoading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        >
+          {isLoading
+            ? language === "en"
+              ? "Submitting..."
+              : "Soumettre..."
+            : language === "en"
+            ? "Submit"
+            : "Valider"}
+        </button>
       </>
     ),
     info: (
@@ -143,15 +294,12 @@ function SenderDashboard() {
           onChange={(e) => setShipmentID(e.target.value)}
           placeholder={IDFields[0] ? IDFields[0][language] : ""}
         />
-
-        {shipmentID && (
-          <button
-            onClick={handleCompleteSubmit}
-            className="bg-gradient-to-r from-yellow-600 to-orange-600 text-black dark:text-white text-sm md:text-base font-normal rounded-xl p-2 mb-2 hover:scale-101 hover:opacity-90 cursor-pointer transition-all duration-300 w-full"
-          >
-            {language === "en" ? "Submit" : "Valider"}
-          </button>
-        )}
+        <button
+          onClick={handleCompleteSubmit}
+          className="bg-gradient-to-r from-yellow-600 to-orange-600 text-black dark:text-white text-sm md:text-base font-normal rounded-xl p-2 mb-2 hover:scale-101 hover:opacity-90 cursor-pointer transition-all duration-300 w-full"
+        >
+          {language === "en" ? "Submit" : "Valider"}
+        </button>
       </>
     ),
     payment: (
@@ -178,20 +326,6 @@ function SenderDashboard() {
         )}
       </>
     ),
-    history: (
-      <>
-        <h2 className="text-black dark:text-white text-lg md:text-xl font-normal mb-2">
-          {language === "en"
-            ? "See transaction history"
-            : "Voir l'historique des transactions"}
-        </h2>
-        <p className="text-black dark:text-white text-sm md:text-base font-normal mb-2">
-          {language === "en"
-            ? "table (development running)"
-            : "tableau (developpement en cours)"}
-        </p>
-      </>
-    ),
     live_tracking: (
       <>
         <h2 className="text-black dark:text-white text-lg md:text-xl font-normal mb-2">
@@ -216,59 +350,110 @@ function SenderDashboard() {
         )}
       </>
     ),
-    notifications: (
+    see_details: shipmentDetails ? (
       <>
         <h2 className="text-black dark:text-white text-lg md:text-xl font-normal mb-2">
-          {language === "en"
-            ? "Notifications and alerts"
-            : "Notifications et alertes"}
+          {language === "en" ? "Shipment Details" : "Détails de l'expédition"}
         </h2>
-        <p className="text-black dark:text-white text-sm md:text-base font-normal mb-2">
-          {language === "en" ? "development running" : "developpement en cours"}
-        </p>
+        <div className="flex flex-col gap-4 flex-wrap w-full">
+          <p className="text-black dark:text-white p-2 rounded-xl bg-neutral-200 dark:bg-neutral-800">
+            <strong className="text-black dark:text-white text-sm md:text-base font-bold">
+              {language === "en" ? "Shipment Name" : "Nom de l'expédition"} :
+            </strong>{" "}
+            <span className="text-sm md:text-base break-all">
+              {shipmentDetails.name || "N/A"}
+            </span>
+          </p>
+          <p className="text-black dark:text-white p-2 rounded-xl bg-neutral-200 dark:bg-neutral-800">
+            <strong className="text-black dark:text-white text-sm md:text-base font-bold">
+              {language === "en" ? "Receiver" : "Destinataire"} :
+            </strong>{" "}
+            <span className="text-sm md:text-base break-all">
+              {shipmentDetails.receiver || "N/A"}
+            </span>
+          </p>
+          <p className="text-black dark:text-white p-2 rounded-xl bg-neutral-200 dark:bg-neutral-800">
+            <strong className="text-black dark:text-white text-sm md:text-base font-bold">
+              {language === "en" ? "Price" : "Prix"} :
+            </strong>{" "}
+            <span className="text-sm md:text-base break-all">
+              {shipmentDetails.price
+                ? ethers.formatEther(shipmentDetails.price) + " ETH"
+                : "N/A"}
+            </span>
+          </p>
+          <p className="text-black dark:text-white p-2 rounded-xl bg-neutral-200 dark:bg-neutral-800">
+            <strong className="text-black dark:text-white text-sm md:text-base font-bold">
+              {language === "en" ? "Pickup Location" : "Lieu de ramassage"} :
+            </strong>{" "}
+            <span className="text-sm md:text-base break-all">
+              {shipmentDetails.pickupLocation || "N/A"}
+            </span>
+          </p>
+          <p className="text-black dark:text-white p-2 rounded-xl bg-neutral-200 dark:bg-neutral-800">
+            <strong className="text-black dark:text-white text-sm md:text-base font-bold">
+              {language === "en" ? "Delivery Location" : "Lieu de livraison"} :
+            </strong>{" "}
+            <span className="text-sm md:text-base break-all">
+              {shipmentDetails.deliveryLocation || "N/A"}
+            </span>
+          </p>
+          <p className="text-black dark:text-white p-2 rounded-xl bg-neutral-200 dark:bg-neutral-800">
+            <strong className="text-black dark:text-white text-sm md:text-base font-bold">
+              {language === "en" ? "Pickup Date" : "Date de ramassage"} :
+            </strong>{" "}
+            <span className="text-sm md:text-base break-all">
+              {shipmentDetails.pickupDate && shipmentDetails.pickupDate > 0
+                ? new Date(
+                    Number(shipmentDetails.pickupDate) * 1000
+                  ).toLocaleString()
+                : "N/A"}
+            </span>
+          </p>
+          <p className="text-black dark:text-white p-2 rounded-xl bg-neutral-200 dark:bg-neutral-800">
+            <strong className="text-black dark:text-white text-sm md:text-base font-bold">
+              {language === "en" ? "Delivery Date" : "Date de livraison"} :
+            </strong>{" "}
+            <span className="text-sm md:text-base break-all">
+              {shipmentDetails.deliveryDate && shipmentDetails.deliveryDate > 0
+                ? new Date(
+                    Number(shipmentDetails.deliveryDate) * 1000
+                  ).toLocaleString()
+                : "N/A"}
+            </span>
+          </p>
+          <p className="text-black dark:text-white p-2 rounded-xl bg-neutral-200 dark:bg-neutral-800">
+            <strong className="text-black dark:text-white text-sm md:text-base font-bold">
+              {language === "en" ? "Status" : "Statut"} :
+            </strong>{" "}
+            <span className="text-sm md:text-base break-all">
+              {shipmentDetails.status === 0n
+                ? language === "en"
+                  ? "Pending"
+                  : "En attente"
+                : shipmentDetails.status === 1n
+                ? language === "en"
+                  ? "Accepted"
+                  : "Accepté"
+                : shipmentDetails.status === 2n
+                ? language === "en"
+                  ? "In transit"
+                  : "En transit"
+                : shipmentDetails.status === 3n
+                ? language === "en"
+                  ? "Delivered"
+                  : "Livraison effectuée"
+                : "Paid"}
+            </span>
+          </p>
+        </div>
       </>
-    ),
-    doc: (
-      <>
-        <h2 className="text-black dark:text-white text-lg md:text-xl font-normal mb-2">
-          {language === "en" ? "Document management" : "Gestion des documents"}
-        </h2>
-        <p className="text-black dark:text-white text-sm md:text-base font-normal mb-2">
-          {language === "en" ? "development running" : "developpement en cours"}
-        </p>
-      </>
-    ),
-    stats: (
-      <>
-        <h2 className="text-black dark:text-white text-lg md:text-xl font-normal mb-2">
-          {language === "en"
-            ? "Statistics and reports"
-            : "Statistiques et rapports"}
-        </h2>
-        <p className="text-black dark:text-white text-sm md:text-base font-normal mb-2">
-          {language === "en" ? "development running" : "developpement en cours"}
-        </p>
-      </>
-    ),
-    rate_carrier: (
-      <>
-        <h2 className="text-black dark:text-white text-lg md:text-xl font-normal mb-2">
-          {language === "en" ? "Rate carriers" : "Évaluer les transporteurs"}
-        </h2>
-        <p className="text-black dark:text-white text-sm md:text-base font-normal mb-2">
-          {language === "en" ? "development running" : "developpement en cours"}
-        </p>
-      </>
-    ),
-    profile: (
-      <>
-        <h2 className="text-black dark:text-white text-lg md:text-xl font-normal mb-2">
-          {language === "en" ? "My Profile" : "Mon profil"}
-        </h2>
-        <p className="text-black dark:text-white text-sm md:text-base font-normal mb-2">
-          {language === "en" ? "development running" : "developpement en cours"}
-        </p>
-      </>
+    ) : (
+      <p className="text-black dark:text-white p-2 rounded-xl bg-neutral-200 dark:bg-neutral-800">
+        {language === "en"
+          ? "No shipment details available."
+          : "Aucun détail d'expédition disponible."}
+      </p>
     ),
   };
 
@@ -298,13 +483,6 @@ function SenderDashboard() {
               {language === "en"
                 ? "Release the payment for a shipment"
                 : "Libérer le paiement d'une expédition"}
-            </Card>
-          </button>
-          <button id="history" onClick={() => setOpenModal("history")}>
-            <Card>
-              {language === "en"
-                ? "See transaction history"
-                : "Voir l'historique des transactions"}
             </Card>
           </button>
           <button

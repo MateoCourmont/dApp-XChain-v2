@@ -2,27 +2,76 @@ import { useState } from "react";
 import { useLanguage } from "../LangContext";
 import Card from "../components/Card";
 import Modal from "../components/Modal";
+import { ethers } from "ethers";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { ShippingContractABI } from "../contracts/ShippingContract";
 
 function CarrierDashboard() {
   const { language } = useLanguage();
   const [openModal, setOpenModal] = useState(null);
-  const [pickupTime, setPickupTime] = useState("");
-  const [deliveryTime, setDeliveryTime] = useState("");
   const [shipmentID, setShipmentID] = useState("");
+  const [pendingShipments, setPendingShipments] = useState([]);
+  const contractAddress = "0xb54e6492ad031681602822b5e0000f163f3a1923";
 
-  const handleCompleteSubmit = () => {};
+  const handleCompleteSubmit = async () => {
+    switch (openModal) {
+      case "payment":
+      case "live_tracking":
+        setShipmentID("");
+        break;
+      default:
+        break;
+    }
+    setOpenModal(null);
+  };
 
-  const CompleteShipmentFields = [
-    {
-      en: "Pickup time... (hour-minutes)",
-      fr: "Heure de ramassage... (heure-minutes)",
-    },
-    {
-      en: "Delivery time... (hour-minutes)",
-      fr: "Heure de livraison... (heure-minutes)",
-    },
-    // A compléter avec les éléments du smartcontract
-  ];
+  const startShipment = () => {};
+  const markAsDelivered = () => {};
+
+  const getPending = async () => {
+    try {
+      if (typeof window.ethereum === "undefined") {
+        alert("Please install MetaMask");
+        return;
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const shippingContract = new ethers.Contract(
+        contractAddress,
+        ShippingContractABI,
+        signer
+      );
+
+      console.log("Calling getPendingShipments from the contract...");
+
+      const shipments = await shippingContract.getPendingShipments();
+
+      console.log("Raw shipments data:", shipments);
+
+      const formattedShipments = shipments.map((s) => ({
+        id: s[0].toString(),
+        name: s[1],
+        sender: s[2],
+        receiver: s[3],
+        carrier: s[4],
+        price: ethers.formatEther(s[5]),
+        pickup: s[6],
+        delivery: s[7],
+        status: s[8].toString(),
+        delivered: s[9],
+        createdAt: s[10].toString(),
+        deliveredAt: s[11].toString(),
+      }));
+
+      setPendingShipments(formattedShipments);
+    } catch (error) {
+      console.error("Failed to fetch shipment details:", error);
+      toast.error("Failed to fetch shipments");
+      setPendingShipments([]);
+    }
+  };
 
   const IDFields = [
     {
@@ -37,46 +86,91 @@ function CarrierDashboard() {
         <h2 className="text-black dark:text-white text-lg md:text-xl font-normal mb-2">
           {language === "en" ? "Join a shipment" : "Se placer sur un transport"}
         </h2>
-        <p className="text-black dark:text-white text-sm md:text-base font-normal mb-2">
-          {language === "en"
-            ? "see created shipments (development running)"
-            : "voir les expéditions créees (developpement en cours)"}
-        </p>
+
+        <div className="mt-4 max-h-[300px] overflow-y-auto space-y-3">
+          {pendingShipments.length === 0 ? (
+            <p className="text-black dark:text-white text-sm">
+              {language === "en"
+                ? "No pending shipments"
+                : "Aucune expédition en attente"}
+            </p>
+          ) : (
+            pendingShipments.map((s) => (
+              <div
+                key={s.id}
+                className="border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-sm text-black dark:text-white bg-neutral-100 dark:bg-neutral-800 w-full"
+              >
+                <p>
+                  <strong>ID:</strong> {s.id}
+                </p>
+                <p>
+                  <strong>{language === "en" ? "Name" : "Nom"}:</strong>{" "}
+                  {s.name}
+                </p>
+                <p>
+                  <strong>{language === "en" ? "Pickup" : "Départ"}:</strong>{" "}
+                  {s.pickup}
+                </p>
+                <p>
+                  <strong>
+                    {language === "en" ? "Delivery" : "Livraison"}:
+                  </strong>{" "}
+                  {s.delivery}
+                </p>
+                <p>
+                  <strong>{language === "en" ? "Price" : "Prix"}:</strong>{" "}
+                  {s.price} ETH
+                </p>
+              </div>
+            ))
+          )}
+        </div>
       </>
     ),
-    complete: (
+    start: (
       <>
         <h2 className="text-black dark:text-white text-lg md:text-xl font-normal mb-2">
-          {language === "en"
-            ? "Complete shipment information"
-            : "Compléter les informations"}
+          {language === "en" ? "Start the shipment" : "Démarrer le transport"}
         </h2>
 
         <input
           type="text"
           className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
-          value={pickupTime}
-          onChange={(e) => setPickupTime(e.target.value)}
-          placeholder={
-            CompleteShipmentFields[0] ? CompleteShipmentFields[0][language] : ""
-          }
+          value={shipmentID}
+          onChange={(e) => setShipmentID(e.target.value)}
+          placeholder={IDFields[0] ? IDFields[0][language] : ""}
         />
+
+        <button
+          onClick={startShipment}
+          className="bg-gradient-to-r from-yellow-600 to-orange-600 text-black dark:text-white text-sm md:text-base font-normal rounded-xl p-2 mb-2 hover:scale-101 hover:opacity-90 cursor-pointer transition-all duration-300 w-full"
+        >
+          {language === "en" ? "Start" : "Démarrer"}
+        </button>
+      </>
+    ),
+    delivered: (
+      <>
+        <h2 className="text-black dark:text-white text-lg md:text-xl font-normal mb-2">
+          {language === "en"
+            ? "Mark the shipment as delivered"
+            : "Déclarer le transport comme livré"}
+        </h2>
+
         <input
           type="text"
           className="text-black dark:text-white text-sm md:text-base font-normal rounded-xl bg-neutral-200 dark:bg-neutral-800 p-2 mb-2 w-full"
-          value={deliveryTime}
-          onChange={(e) => setDeliveryTime(e.target.value)}
-          placeholder={
-            CompleteShipmentFields[1] ? CompleteShipmentFields[1][language] : ""
-          }
+          value={shipmentID}
+          onChange={(e) => setShipmentID(e.target.value)}
+          placeholder={IDFields[0] ? IDFields[0][language] : ""}
         />
 
-        {pickupTime && deliveryTime && (
+        {shipmentID && (
           <button
-            onClick={handleCompleteSubmit}
+            onClick={markAsDelivered}
             className="bg-gradient-to-r from-yellow-600 to-orange-600 text-black dark:text-white text-sm md:text-base font-normal rounded-xl p-2 mb-2 hover:scale-101 hover:opacity-90 cursor-pointer transition-all duration-300 w-full"
           >
-            {language === "en" ? "Submit" : "Valider"}
+            {language === "en" ? "Mark as delivered" : "Déclarer comme livré"}
           </button>
         )}
       </>
@@ -211,21 +305,41 @@ function CarrierDashboard() {
             : "Tableau de bord transporteur"}
         </h2>
         <div className="flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-6 w-full h-full">
-          <button id="joinShipment" onClick={() => setOpenModal("join")}>
+          <button
+            id="joinShipment"
+            onClick={() => {
+              getPending();
+              setOpenModal("join");
+            }}
+          >
             <Card>
               {language === "en"
                 ? "Join a shipment"
                 : "Se placer sur un transport"}
             </Card>
           </button>
-          <button
-            id="completeShipment"
-            onClick={() => setOpenModal("complete")}
-          >
+          <button id="startShipment" onClick={() => setOpenModal("start")}>
+            <Card>
+              {language === "en"
+                ? "Start the shipment"
+                : "Démarrer le transport"}
+            </Card>
+          </button>
+          <button id="completeShipment" onClick={() => setOpenModal("join")}>
             <Card>
               {language === "en"
                 ? "Complete shipment information"
                 : "Compléter les informations d'une expédition"}
+            </Card>
+          </button>
+          <button
+            id="markAsDelivered"
+            onClick={() => setOpenModal("delivered")}
+          >
+            <Card>
+              {language === "en"
+                ? "Mark the shipment as delivered"
+                : "Déclarer le transport comme livré"}
             </Card>
           </button>
           <button id="getInfo" onClick={() => setOpenModal("info")}>
