@@ -25,7 +25,7 @@ function App() {
           <ScrollToTop />
           <div className="flex flex-col min-h-screen">
             <Header />
-            <div className="flex-grow">
+            <div className="flex-grow bg-neutral-50 dark:bg-black">
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route

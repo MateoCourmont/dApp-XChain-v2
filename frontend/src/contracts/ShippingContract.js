@@ -134,6 +134,168 @@ export const ShippingContractABI = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_carrier",
+        type: "address",
+      },
+    ],
+    name: "getActiveShipment",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "id",
+            type: "uint256",
+          },
+          {
+            internalType: "string",
+            name: "name",
+            type: "string",
+          },
+          {
+            internalType: "address",
+            name: "sender",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "carrier",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "receiver",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "price",
+            type: "uint256",
+          },
+          {
+            internalType: "string",
+            name: "pickupLocation",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "deliveryLocation",
+            type: "string",
+          },
+          {
+            internalType: "enum ShippingContract.ShipmentStatus",
+            name: "status",
+            type: "uint8",
+          },
+          {
+            internalType: "bool",
+            name: "paymentReleased",
+            type: "bool",
+          },
+          {
+            internalType: "uint256",
+            name: "pickupDate",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "deliveryDate",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct ShippingContract.Shipment",
+        name: "",
+        type: "tuple",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_carrier",
+        type: "address",
+      },
+    ],
+    name: "getInTransitShipment",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "id",
+            type: "uint256",
+          },
+          {
+            internalType: "string",
+            name: "name",
+            type: "string",
+          },
+          {
+            internalType: "address",
+            name: "sender",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "carrier",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "receiver",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "price",
+            type: "uint256",
+          },
+          {
+            internalType: "string",
+            name: "pickupLocation",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "deliveryLocation",
+            type: "string",
+          },
+          {
+            internalType: "enum ShippingContract.ShipmentStatus",
+            name: "status",
+            type: "uint8",
+          },
+          {
+            internalType: "bool",
+            name: "paymentReleased",
+            type: "bool",
+          },
+          {
+            internalType: "uint256",
+            name: "pickupDate",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "deliveryDate",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct ShippingContract.Shipment",
+        name: "",
+        type: "tuple",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "getPendingShipments",
     outputs: [
@@ -292,6 +454,63 @@ export const ShippingContractABI = [
   {
     inputs: [
       {
+        internalType: "address",
+        name: "carrier",
+        type: "address",
+      },
+    ],
+    name: "getShipmentsByCarrier",
+    outputs: [
+      {
+        internalType: "uint256[]",
+        name: "",
+        type: "uint256[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "sender",
+        type: "address",
+      },
+    ],
+    name: "getShipmentsBySender",
+    outputs: [
+      {
+        internalType: "uint256[]",
+        name: "",
+        type: "uint256[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_carrier",
+        type: "address",
+      },
+    ],
+    name: "isCarrierBusy",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "uint256",
         name: "_id",
         type: "uint256",
@@ -312,7 +531,7 @@ export const ShippingContractABI = [
     ],
     name: "releasePayment",
     outputs: [],
-    stateMutability: "payable",
+    stateMutability: "nonpayable",
     type: "function",
   },
   {

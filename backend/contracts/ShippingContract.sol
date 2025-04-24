@@ -31,6 +31,8 @@ contract ShippingContract {
 
     uint public shipmentCount;
     mapping(uint => Shipment) public shipments;
+    mapping(address => uint[]) private shipmentsBySender;
+    mapping(address => uint[]) private shipmentsByCarrier;
 
     event ShipmentCreated(uint id, address sender);
     event ShipmentAccepted(uint id, address carrier);
@@ -95,18 +97,46 @@ contract ShippingContract {
             deliveryDate: 0
         });
 
+        shipmentsBySender[msg.sender].push(shipmentCount);
+
         emit ShipmentCreated(shipmentCount, msg.sender);
     }
 
+    function getShipmentsBySender(address sender) external view returns (uint[] memory) {
+    return shipmentsBySender[sender];
+}
+
+
     function acceptShipment(uint _id) external onlyCarrierRole shipmentExists(_id) {
+        require(!isCarrierBusy(msg.sender), "Carrier already has an active shipment"); 
+
         Shipment storage s = shipments[_id];
         require(s.status == ShipmentStatus.Pending, "Already accepted");
 
         s.carrier = msg.sender;
         s.status = ShipmentStatus.Accepted;
 
+        shipmentsByCarrier[msg.sender].push(_id);
+
         emit ShipmentAccepted(_id, msg.sender);
     }
+    
+    function getShipmentsByCarrier(address carrier) external view returns (uint[] memory) {
+    return shipmentsByCarrier[carrier];
+    }
+
+
+    function isCarrierBusy(address _carrier) public view returns (bool) {
+    for (uint i = 1; i <= shipmentCount; i++) {
+        if (
+            shipments[i].carrier == _carrier &&
+            (shipments[i].status == ShipmentStatus.Accepted || shipments[i].status == ShipmentStatus.InTransit)
+            ) {
+            return true;
+        }
+    }
+    return false;
+}
 
     function shipmentInTransit(uint _id) external onlyCarrier(_id) shipmentExists(_id) {
         Shipment storage s = shipments[_id];
@@ -129,20 +159,16 @@ contract ShippingContract {
         emit ShipmentDelivered(_id);
     }
 
-    function releasePayment(uint _id) external payable onlySender(_id) shipmentExists(_id) {
-        Shipment storage s = shipments[_id];
-        require(s.status == ShipmentStatus.Delivered, "Not delivered yet");
-        require(!s.paymentReleased, "Payment already released");
-        require(msg.value == s.price, "Incorrect payment amount");
+    function releasePayment(uint _id) external onlySender(_id) shipmentExists(_id) {
+    Shipment storage s = shipments[_id];
+    require(s.status == ShipmentStatus.Delivered, "Not delivered yet");
+    require(!s.paymentReleased, "Payment already released");
 
-        s.paymentReleased = true;
-        s.status = ShipmentStatus.Paid;
+    s.paymentReleased = true;
+    s.status = ShipmentStatus.Paid;
 
-        (bool success, ) = s.carrier.call{value: msg.value}("");
-        require(success, "Payment transfer failed");
-
-        emit PaymentReleased(_id);
-    }
+    emit PaymentReleased(_id);
+}
 
     function getShipment(uint _id) external view shipmentExists(_id) returns (Shipment memory) {
         return shipments[_id];
@@ -168,4 +194,31 @@ contract ShippingContract {
 
     return pendingShipments;
 }
+
+function getActiveShipment(address _carrier) external view returns (Shipment memory) {
+    for (uint i = 1; i <= shipmentCount; i++) {
+        if (
+            shipments[i].carrier == _carrier &&
+            (shipments[i].status == ShipmentStatus.Accepted)
+        ) {
+            return shipments[i];
+        }
+    }
+
+    revert("No active shipment found for this carrier");
+}
+
+function getInTransitShipment(address _carrier) external view returns (Shipment memory) {
+    for (uint i = 1; i <= shipmentCount; i++) {
+        if (
+            shipments[i].carrier == _carrier &&
+            (shipments[i].status == ShipmentStatus.InTransit)
+        ) {
+            return shipments[i];
+        }
+    }
+
+    revert("No In Transit shipment found for this carrier");
+}
+
 }

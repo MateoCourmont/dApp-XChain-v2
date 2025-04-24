@@ -43,7 +43,11 @@ const PrivateRoute = ({ element: Element, requiredRole, ...rest }) => {
   }, [requiredRole]);
 
   if (loading) {
-    return <div className="bg-neutral-50 dark:bg-black">Chargement...</div>;
+    return (
+      <div className="bg-neutral-50 dark:bg-black text-black dark:text-white flex justify-center w-full pt-20">
+        {language === "en" ? "Loading..." : "Chargement..."}
+      </div>
+    );
   }
 
   return isAuthorized ? <Element {...rest} /> : <Navigate to="/PreDashboard" />;
